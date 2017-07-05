@@ -30,11 +30,13 @@ SOURCES += main.cpp \
     nlms.cpp \
     nrme.cpp \
     fftwrapper.cpp \
-    bpfilter.cpp
+    bpfilter.cpp \
+    movingavgfilter.cpp
 
 HEADERS += \
     signalextractor.h \
     nlms.h \
     nrme.h \
     fftwrapper.h \
-    bpfilter.h
+    bpfilter.h \
+    movingavgfilter.h

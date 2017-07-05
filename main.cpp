@@ -7,6 +7,7 @@
 #include "fftwrapper.h"
 #include "bpfilter.h"
 #include "nlms.h"
+#include "movingavgfilter.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -29,7 +30,6 @@ namespace py = pybind11;
 int main()
 {
     Py_Initialize();
-    py::gil_scoped_acquire acquire;
 
     QDir sourcedir("/home/neo/Documents/cpp/detection-cardiaque/HRLib/HRLib/Heart-rate-measurement-with-a-webcam/plot/");
     py::module sysmod = py::module::import("sys");
@@ -83,26 +83,30 @@ int main()
 
     NLMS nlms;
     std::vector<double> signal;
-    signal = nlms.compute_nlms(d, x, 0.0f);
-
-    BPFilter filtre;
-    std::vector<double> filtered;
-    filtered = filtre.get_filtered_signal(signal);
+    signal = nlms.compute_nlms(d, x, 0.1f);
 
     NRME nrme(10);
     std::vector<double> post_nrme;
-    post_nrme = nrme.nrme(filtered);
+    post_nrme = nrme.nrme(signal);
+
+    movingAvgFilter avg(11);
+    std::vector<double> mvAvg;
+    mvAvg = avg.filter(post_nrme);
+
+    BPFilter filtre;
+    std::vector<double> filtered;
+    filtered = filtre.get_filtered_signal(mvAvg);
 
 
     int NFFT = 1024;
-    std::vector<double> post_fft = FFTWrapper::compute_rfft(post_nrme, NFFT);
+    std::vector<double> post_fft = FFTWrapper::compute_rfft(filtered, NFFT);
 
     double HR = FFTWrapper::get_freq_highest_peak(post_fft, NFFT, 30);
 
-    plot_all(x, signal, filtered, post_nrme, post_fft);
-
     std::cout << "Finished !" << std::endl;
     std::cout << "HR : " << HR << "Hz = " << HR*60 << "bpm" << std::endl;
+
+    plot_all(x, signal, filtered, post_nrme, mvAvg, post_fft);
 
     return 0;
 }
