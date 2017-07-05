@@ -21,10 +21,11 @@ def plot_signal(y, title):
     ax.grid(True)
 
 
-def plot_all(x, signal, filtered, nrme, fft):
+def plot_all(x, signal, filtered, nrme, avg, fft):
     plot_signal(x, "moyenner")
     plot_signal(signal, "nlms")
     plot_signal(filtered, "passe bande")
     plot_signal(nrme, "nrme")
+    plot_signal(avg, "moving avg")
     plot_fft(fft)
     plt.show()
