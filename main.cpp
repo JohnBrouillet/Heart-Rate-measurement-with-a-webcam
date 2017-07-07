@@ -2,12 +2,12 @@
 #include <chrono>
 #include <thread>
 
-#include "nrme.h"
-#include "signalextractor.h"
-#include "fftwrapper.h"
-#include "bpfilter.h"
-#include "nlms.h"
-#include "movingavgfilter.h"
+#include "include/nrme.h"
+#include "include/signalextractor.h"
+#include "include/fftwrapper.h"
+#include "include/bpfilter.h"
+#include "include/nlms.h"
+#include "include/movingavgfilter.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -31,26 +31,49 @@ int main()
 {
     Py_Initialize();
 
-    QDir sourcedir("/home/neo/Documents/cpp/detection-cardiaque/HRLib/HRLib/Heart-rate-measurement-with-a-webcam/plot/");
+    QDir sourcedir("/home/neo/Documents/cpp/detection-cardiaque/HRLib/HRLib/Heart-rate-measurement-with-a-webcam/python/plot/");
     py::module sysmod = py::module::import("sys");
     py::function sysappend = sysmod.attr("path").attr("append").cast<py::function>();
     sysappend(sourcedir.absolutePath().toStdString());
 
     auto mymod = py::module::import("plot");
-    auto plot = mymod.attr("plot_signal");
-    auto plot_fft = mymod.attr("plot_fft");
     auto plot_all = mymod.attr("plot_all");
 
     SignalExtractor extractor;
     std::vector<cv::Mat> data;
-    cv::VideoCapture cap(0);
+    cv::VideoCapture cap("face.mp4");
+   /* for(int i = 0; i < 500; i++)
+    {
+        cv::Mat img;
+        cap >> img;
+    }*/
+    std::cout << "wait " << std::endl;
+cv::namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
+   // std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    for(int i = 0; i < 300; i++)
+    std::cout << "get" << std::endl;
+  /*  for(int i = 0; i < 600; i++)
     {
         cv::Mat img;
         cap >> img;
         data.push_back(img);
+    }*/
+
+
+    while(1)
+    {
+        cv::Mat img;
+        cap >> img;
+
+        if(img.empty())
+            break;
+        data.push_back(img);
+        cv::imshow("MyVideo", img);
+        if(cv::waitKey(30) == 27) //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
+          {
+
+                   break;
+          }
     }
 
     std::cout << "ok !" << std::endl;
@@ -78,14 +101,14 @@ int main()
         return vec;
     };
 
-    std::vector<double> d = moyennage(signal_roi);
-    std::vector<double> x = moyennage(signal_background);
+    std::vector<double> d = (signal_roi);
+    std::vector<double> x = (signal_background);
 
     NLMS nlms;
     std::vector<double> signal;
     signal = nlms.compute_nlms(d, x, 0.1f);
 
-    NRME nrme(10);
+    NRME nrme(30);
     std::vector<double> post_nrme;
     post_nrme = nrme.nrme(signal);
 

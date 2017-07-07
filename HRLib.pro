@@ -26,17 +26,17 @@ LIBS += -lopencv_core \
         -lmkl_intel_lp64
 
 SOURCES += main.cpp \
-    signalextractor.cpp \
-    nlms.cpp \
-    nrme.cpp \
-    fftwrapper.cpp \
-    bpfilter.cpp \
-    movingavgfilter.cpp
+    src/signalextractor.cpp \
+    src/nlms.cpp \
+    src/nrme.cpp \
+    src/fftwrapper.cpp \
+    src/bpfilter.cpp \
+    src/movingavgfilter.cpp
 
 HEADERS += \
-    signalextractor.h \
-    nlms.h \
-    nrme.h \
-    fftwrapper.h \
-    bpfilter.h \
-    movingavgfilter.h
+    include/signalextractor.h \
+    include/nlms.h \
+    include/nrme.h \
+    include/fftwrapper.h \
+    include/bpfilter.h \
+    include/movingavgfilter.h

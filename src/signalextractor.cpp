@@ -59,8 +59,11 @@ void SignalExtractor::getGreenVectors(const cv::Mat& img, dlib::full_object_dete
     cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     cv::drawContours(mask,contours,0,cv::Scalar(255),CV_FILLED,1);
 
-    for(int i = 1; i < img.rows*img.cols; i+=3)
-        mask.data[i] == 255 ? roi.push_back(img.data[i]) : background.push_back(img.data[i]);
+    cv::Mat bgr[3];
+    cv::split(img, bgr);
+    uchar* green = img.data;
+    for(int i = 0; i < img.rows*img.cols; i++)
+        mask.data[i] == 255 ? roi.push_back(green[i]) : background.push_back(green[i]);
 }
 
 std::pair<double,double> SignalExtractor::computeMean(std::vector<int>& roi, std::vector<int>& background)

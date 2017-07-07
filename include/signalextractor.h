@@ -18,7 +18,7 @@
 
 const int NB_POINTS = 9;
 const int COUNT_LIMIT = 30;
-const int FACE_DOWNSAMPLE_RATIO = 2;
+const int FACE_DOWNSAMPLE_RATIO = 1;
 
 class SignalExtractor
 {

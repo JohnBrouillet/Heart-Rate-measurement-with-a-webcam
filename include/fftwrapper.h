@@ -1,7 +1,7 @@
 #ifndef FFTWRAPPER_H
 #define FFTWRAPPER_H
 
-#include <iostream>
+
 #include <vector>
 #include <armadillo>
 
