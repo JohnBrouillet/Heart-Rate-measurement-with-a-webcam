@@ -49,12 +49,12 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = main.cpp \
-		signalextractor.cpp \
-		nlms.cpp \
-		nrme.cpp \
-		fftwrapper.cpp \
-		bpfilter.cpp \
-		movingavgfilter.cpp 
+		src/signalextractor.cpp \
+		src/nlms.cpp \
+		src/nrme.cpp \
+		src/fftwrapper.cpp \
+		src/bpfilter.cpp \
+		src/movingavgfilter.cpp 
 OBJECTS       = main.o \
 		signalextractor.o \
 		nlms.o \
@@ -121,18 +121,18 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		HRLib.pro signalextractor.h \
-		nlms.h \
-		nrme.h \
-		fftwrapper.h \
-		bpfilter.h \
-		movingavgfilter.h main.cpp \
-		signalextractor.cpp \
-		nlms.cpp \
-		nrme.cpp \
-		fftwrapper.cpp \
-		bpfilter.cpp \
-		movingavgfilter.cpp
+		HRLib.pro include/signalextractor.h \
+		include/nlms.h \
+		include/nrme.h \
+		include/fftwrapper.h \
+		include/bpfilter.h \
+		include/movingavgfilter.h main.cpp \
+		src/signalextractor.cpp \
+		src/nlms.cpp \
+		src/nrme.cpp \
+		src/fftwrapper.cpp \
+		src/bpfilter.cpp \
+		src/movingavgfilter.cpp
 QMAKE_TARGET  = HRLib
 DESTDIR       = 
 TARGET        = HRLib
@@ -281,8 +281,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents signalextractor.h nlms.h nrme.h fftwrapper.h bpfilter.h movingavgfilter.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp signalextractor.cpp nlms.cpp nrme.cpp fftwrapper.cpp bpfilter.cpp movingavgfilter.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/signalextractor.h include/nlms.h include/nrme.h include/fftwrapper.h include/bpfilter.h include/movingavgfilter.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp src/signalextractor.cpp src/nlms.cpp src/nrme.cpp src/fftwrapper.cpp src/bpfilter.cpp src/movingavgfilter.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -322,31 +322,26 @@ compiler_clean:
 
 ####### Compile
 
-main.o: main.cpp nrme.h \
-		signalextractor.h \
-		fftwrapper.h \
-		bpfilter.h \
-		nlms.h \
-		movingavgfilter.h
+main.o: main.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
-signalextractor.o: signalextractor.cpp signalextractor.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o signalextractor.o signalextractor.cpp
+signalextractor.o: src/signalextractor.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o signalextractor.o src/signalextractor.cpp
 
-nlms.o: nlms.cpp nlms.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o nlms.o nlms.cpp
+nlms.o: src/nlms.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o nlms.o src/nlms.cpp
 
-nrme.o: nrme.cpp nrme.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o nrme.o nrme.cpp
+nrme.o: src/nrme.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o nrme.o src/nrme.cpp
 
-fftwrapper.o: fftwrapper.cpp fftwrapper.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fftwrapper.o fftwrapper.cpp
+fftwrapper.o: src/fftwrapper.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fftwrapper.o src/fftwrapper.cpp
 
-bpfilter.o: bpfilter.cpp bpfilter.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o bpfilter.o bpfilter.cpp
+bpfilter.o: src/bpfilter.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o bpfilter.o src/bpfilter.cpp
 
-movingavgfilter.o: movingavgfilter.cpp movingavgfilter.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o movingavgfilter.o movingavgfilter.cpp
+movingavgfilter.o: src/movingavgfilter.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o movingavgfilter.o src/movingavgfilter.cpp
 
 ####### Install
 
