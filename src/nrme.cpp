@@ -1,4 +1,4 @@
-#include "nrme.h"
+#include "include/nrme.h"
 
 NRME::NRME(int _nb_segment){
     nb_segment = _nb_segment;

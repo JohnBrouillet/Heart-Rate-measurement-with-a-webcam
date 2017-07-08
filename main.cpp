@@ -13,12 +13,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <dlib/opencv.h>
-#include <dlib/image_processing/frontal_face_detector.h>
-#include <dlib/image_processing/render_face_detections.h>
-#include <dlib/image_processing.h>
-#include <dlib/gui_widgets.h>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <Python.h>
@@ -26,6 +20,10 @@
 
 #include <QDir>
 namespace py = pybind11;
+
+const int nb_samples = 600; // 20 seconds
+const int nb_segment = 10;
+const int movingAvgSize = 11;
 
 int main()
 {
@@ -39,46 +37,28 @@ int main()
     auto mymod = py::module::import("plot");
     auto plot_all = mymod.attr("plot_all");
 
-    SignalExtractor extractor;
+    cv::Mat img;
     std::vector<cv::Mat> data;
-    cv::VideoCapture cap("face.mp4");
-   /* for(int i = 0; i < 500; i++)
-    {
-        cv::Mat img;
-        cap >> img;
-    }*/
-    std::cout << "wait " << std::endl;
-cv::namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
-   // std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    cv::VideoCapture cap(0);
+    cap >> img;
 
-    std::cout << "get" << std::endl;
-  /*  for(int i = 0; i < 600; i++)
-    {
+    std::cout << "We wait 3 seconds for the camera to stabilize" << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    std::cout << "Let's go! Don't move!" << std::endl;
+
+    for(int i = 0; i < nb_samples; ++i)
+    {      
         cv::Mat img;
         cap >> img;
         data.push_back(img);
-    }*/
-
-
-    while(1)
-    {
-        cv::Mat img;
-        cap >> img;
-
-        if(img.empty())
-            break;
-        data.push_back(img);
-        cv::imshow("MyVideo", img);
-        if(cv::waitKey(30) == 27) //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
-          {
-
-                   break;
-          }
     }
+    cap.release();
+    std::cout << "Acquisition done! "<< std::endl;
 
-    std::cout << "ok !" << std::endl;
+    auto t1 = std::chrono::high_resolution_clock::now();
 
     std::vector<double> signal_roi, signal_background;
+    SignalExtractor extractor;
     for(int i = 0; i < data.size(); i++)
     {
         std::pair<double, double> res = extractor.compute_frame(data[i]);
@@ -86,50 +66,52 @@ cv::namedWindow("MyVideo",CV_WINDOW_AUTOSIZE);
         signal_background.push_back(res.second);
     }
 
-    std::cout << "I got the signal ! " << signal_roi.size() << std::endl;
-    std::cout << "COMPUTING TO THE DEATH !" << std::endl;
+    std::cout << "Computation" << std::endl;
 
-    auto moyennage = [](std::vector<double> vec){
-
-        auto mean = [](std::vector<double>& vec){
-            double sum = std::accumulate(vec.begin(),vec.end(),0.0);
-            return double(sum / vec.size());
-        };
-
-        double moy = mean(vec);
-        std::for_each(vec.begin(), vec.end(), [&](double& d) { d-=moy;});
-        return vec;
-    };
-
-    std::vector<double> d = (signal_roi);
-    std::vector<double> x = (signal_background);
+    std::vector<double> desired = signal_roi;
+    std::vector<double> noise = signal_background;
 
     NLMS nlms;
-    std::vector<double> signal;
-    signal = nlms.compute_nlms(d, x, 0.1f);
+    std::vector<double> post_nlms;
+    post_nlms = nlms.compute_nlms(desired, noise, 0.1f);
 
-    NRME nrme(30);
+    NRME nrme(nb_segment);
     std::vector<double> post_nrme;
-    post_nrme = nrme.nrme(signal);
+    post_nrme = nrme.nrme(post_nlms);
 
-    movingAvgFilter avg(11);
+    auto detrending = [](std::vector<double>& vec){
+      std::vector<double> detrend;
+      detrend.push_back(0);
+      for(int i = 1; i < vec.size(); i++)
+          detrend.push_back(vec[i] - vec[i-1] + 0.9*detrend[i-1]);
+
+      return detrend;
+    };
+
+    std::vector<double> detrend;
+    detrend = detrending(post_nrme);
+
+    movingAvgFilter avg(movingAvgSize);
     std::vector<double> mvAvg;
-    mvAvg = avg.filter(post_nrme);
+    mvAvg = avg.filter(detrend);
 
     BPFilter filtre;
     std::vector<double> filtered;
     filtered = filtre.get_filtered_signal(mvAvg);
-
 
     int NFFT = 1024;
     std::vector<double> post_fft = FFTWrapper::compute_rfft(filtered, NFFT);
 
     double HR = FFTWrapper::get_freq_highest_peak(post_fft, NFFT, 30);
 
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+
     std::cout << "Finished !" << std::endl;
     std::cout << "HR : " << HR << "Hz = " << HR*60 << "bpm" << std::endl;
+    std::cout << "Processing time: " << fp_ms.count() << "ms" << std::endl;
 
-    plot_all(x, signal, filtered, post_nrme, mvAvg, post_fft);
+    plot_all(desired, post_nlms, post_nrme, detrend, mvAvg, filtered, post_fft, NFFT);
 
     return 0;
 }

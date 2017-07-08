@@ -1,4 +1,4 @@
-#include "nlms.h"
+#include "include/nlms.h"
 
 
 std::vector<double> NLMS::compute_nlms(std::vector<double> d, std::vector<double> x, double alpha)

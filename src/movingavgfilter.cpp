@@ -1,4 +1,4 @@
-#include "movingavgfilter.h"
+#include "include/movingavgfilter.h"
 
 movingAvgFilter::movingAvgFilter(int _M)
 {

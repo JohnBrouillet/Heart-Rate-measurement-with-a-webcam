@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_fft(y):
+def plot_fft(y, nfft):
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    N = 512
+    N = nfft/2
     # sample spacing
     T = 1.0 / 30.0
     x = np.linspace(0.0, N*T, N)
@@ -21,11 +21,12 @@ def plot_signal(y, title):
     ax.grid(True)
 
 
-def plot_all(x, signal, filtered, nrme, avg, fft):
-    plot_signal(x, "moyenner")
-    plot_signal(signal, "nlms")
-    plot_signal(filtered, "passe bande")
-    plot_signal(nrme, "nrme")
-    plot_signal(avg, "moving avg")
-    plot_fft(fft)
+def plot_all(roi_face, post_nlms, post_nrme, detrended, avg, BPfilter, fft, nfft):
+    plot_signal(roi_face, "Green signal from the face")
+    plot_signal(post_nlms, "NLMS")
+    plot_signal(post_nrme, "NRME")
+    plot_signal(detrended, "Detrended signal")
+    plot_signal(avg, "moving average filter")
+    plot_signal(BPfilter, "Bandpass filter")
+    plot_fft(fft, nfft)
     plt.show()

@@ -1,4 +1,4 @@
-#include "bpfilter.h"
+#include "include/bpfilter.h"
 
 std::vector<double> BPFilter::get_filtered_signal(std::vector<double>& signal)
 {
@@ -30,8 +30,8 @@ double SampleFilter_get(SampleFilter* f) {
   double acc = 0;
   int index = f->last_index, i;
   for(i = 0; i < SAMPLEFILTER_TAP_NUM; ++i) {
-    index = index != 0 ? index-1 : SAMPLEFILTER_TAP_NUM-1;
     acc += f->history[index] * filter_taps[i];
+    index = index != 0 ? index-1 : SAMPLEFILTER_TAP_NUM-1;
   };
   return acc;
 }

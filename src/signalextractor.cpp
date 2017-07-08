@@ -1,17 +1,18 @@
-#include "signalextractor.h"
+#include "include/signalextractor.h"
 
 SignalExtractor::SignalExtractor() : id{1, 3, 6, 8, 10, 13, 15, 41, 47},
-    offset_x{10, 7, 0, 0, 0, -7, -10, 0, 0},  offset_y{0, 0, -10, -10, -10, 0, 0, 10, 10}
+    offset_x{20, 14, 0, 0, 0, -14, -20, 0, 0},  offset_y{0, 0, -20, -20, -20, 0, 0, 20, 20}
 {
     detector = dlib::get_frontal_face_detector();
     dlib::deserialize("shape_predictor_68_face_landmarks.dat") >> pose_model;
     count = 0;
     start = std::chrono::steady_clock::now();
+
+
 }
 
 std::pair<double,double> SignalExtractor::compute_frame(cv::Mat img)
 {
-    cv::resize(img, img, cv::Size(), 1.0/FACE_DOWNSAMPLE_RATIO, 1.0/FACE_DOWNSAMPLE_RATIO);
     mask = cv::Mat::zeros(img.rows,img.cols,CV_8UC1);
 
     dlib::cv_image<dlib::bgr_pixel> cimg(img);
@@ -48,9 +49,12 @@ void SignalExtractor::getGreenVectors(const cv::Mat& img, dlib::full_object_dete
     {
         auto s = shapes.part(id[i]);
         rook_points.push_back(cv::Point(s.x() + offset_x[i], s.y() + offset_y[i]));
+        cv::circle(img,rook_points[i],4,CV_RGB(255,0,0));
     }
-    cv::circle(img,rook_points[0],2,CV_RGB(255,0,0));
 
+//    cv::namedWindow("Face detection",CV_WINDOW_AUTOSIZE);
+  //  cv::imshow("Face detection", img);
+    //if(cv::waitKey(30) == 27);
 
     for(int i = 0; i < NB_POINTS; ++i)
         cv::line(mask,rook_points[i],rook_points[(i+1)%NB_POINTS],cv::Scalar(255),1);

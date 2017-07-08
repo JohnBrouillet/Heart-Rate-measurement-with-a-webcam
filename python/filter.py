@@ -1,6 +1,7 @@
 
 
 """" https://stackoverflow.com/a/16306891 """
+
 import numpy as np
 from scipy.signal import firwin, remez, kaiser_atten, kaiser_beta
 
@@ -38,9 +39,8 @@ if __name__ == "__main__":
     lowcut = 0.5
     highcut = 4.5
 
-    ntaps = 128
+    ntaps = 256
     taps_hamming = bandpass_firwin(ntaps, lowcut, highcut, fs=fs)
-    print(list(taps_hamming))
     taps_kaiser16 = bandpass_kaiser(ntaps, lowcut, highcut, fs=fs, width=1.6)
     taps_kaiser10 = bandpass_kaiser(ntaps, lowcut, highcut, fs=fs, width=1.0)
     remez_width = 1.0
