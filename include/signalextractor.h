@@ -16,7 +16,7 @@
 #include <numeric>
 
 
-const int NB_POINTS = 9;
+const int NB_POINTS = 4;
 const int COUNT_LIMIT = 30;
 
 class SignalExtractor

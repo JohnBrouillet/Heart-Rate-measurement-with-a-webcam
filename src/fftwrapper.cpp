@@ -8,7 +8,7 @@ std::vector<double> FFTWrapper::compute_rfft(std::vector<double> data, int NFFT)
 
 double FFTWrapper::get_freq_highest_peak(std::vector<double>& fft, int NFFT, float fech)
 {
-    int index = std::distance(fft.begin(), max_element(fft.begin()+1+0.7*NFFT/fech, fft.end()));
+    int index = std::distance(fft.begin(), max_element(fft.begin()+0.5*(float)NFFT/fech, fft.end()));
     return double(index) * fech / (double)NFFT;
 }
 
